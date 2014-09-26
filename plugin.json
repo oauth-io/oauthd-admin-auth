@@ -1,5 +1,5 @@
 {
-	"name": "default_auth",
+	"name": "auth",
 	"description": "The default auth plugin for oauthd.",
 	"version": "0.0.1",
 	"main": "index.js"
