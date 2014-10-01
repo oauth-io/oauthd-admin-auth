@@ -76,14 +76,9 @@ module.exports = (env) ->
 				return cb null, false if not res
 				return cb null, res
 
-	auth.init = ->
-		restifyOAuth2.cc env.server,
-			hooks:hooks, tokenEndpoint: env.config.base + '/token',
-			tokenExpirationTime: _config.expire
-
-
-	# auth plugin specific
-	auth.needed = (req, res, next) ->
+	# Middleware setup
+	env.middlewares.auth = {} # inits the authentication middleware
+	env.middlewares.auth.needed = (req, res, next) ->
 		cb = ->
 			req.user = req.clientId
 			req.body ?= {}
@@ -99,7 +94,7 @@ module.exports = (env) ->
 			req.clientId = 'admin'
 			cb()
 
-	auth.optional = (req, res, next) ->
+	env.middlewares.auth.optional = (req, res, next) ->
 		cb = ->
 			req.user = req.clientId
 			req.body ?= {}
@@ -113,6 +108,12 @@ module.exports = (env) ->
 			return cb() if not res
 			req.clientId = 'admin'
 			cb()
+
+
+	auth.init = ->
+		restifyOAuth2.cc env.server,
+			hooks:hooks, tokenEndpoint: env.config.base + '/token',
+			tokenExpirationTime: _config.expire
 
 	auth.setup = (callback) ->
 		env.server.post env.config.base + '/signin', (req, res, next) =>
@@ -141,7 +142,6 @@ module.exports = (env) ->
 				res.json apps
 
 		callback()
-
-
+		
 	auth
 
