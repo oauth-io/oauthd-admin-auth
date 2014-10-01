@@ -137,7 +137,7 @@ module.exports = (env) ->
 					res.send 400, e.message
 				next()
 			
-		env.server.get env.config.base + '/api/apps', auth.needed, (req, res, next) ->
+		env.server.get env.config.base + '/api/apps', env.middlewares.auth.needed, (req, res, next) ->
 			env.data.apps.getByOwner 'undefined', (err, apps) ->
 				res.json apps
 
