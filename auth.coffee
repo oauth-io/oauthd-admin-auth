@@ -81,13 +81,13 @@ module.exports = (env) ->
 	env.middlewares.auth.needed = (req, res, next) ->
 		cb = ->
 			req.user = req.clientId
+			req.user.id = 'admin'
 			req.body ?= {}
 			next()
 		return cb() if env.data.redis.last_error
 		return cb() if req.clientId
 		# token = req.headers.cookie?.match /accessToken=%22(.*?)%22/
-		token = req.headers.Authorization.replace /^Bearer /, ''
-		console.log 'token', token
+		token = req.headers.Authorization?.replace /^Bearer /, ''
 		return next new restify.ResourceNotFoundError req.url + ' does not exist' if not token
 		env.data.redis.hget 'session:' + token, 'date', (err, res) ->
 			return next new restify.ResourceNotFoundError req.url + ' does not exist' if not res
@@ -97,6 +97,7 @@ module.exports = (env) ->
 	env.middlewares.auth.optional = (req, res, next) ->
 		cb = ->
 			req.user = req.clientId
+			req.user.id = 'admin'
 			req.body ?= {}
 			next()
 		return cb() if env.data.redis.last_error
@@ -138,7 +139,7 @@ module.exports = (env) ->
 				next()
 			
 		env.server.get env.config.base + '/api/apps', env.middlewares.auth.needed, (req, res, next) ->
-			env.data.apps.getByOwner 'undefined', (err, apps) ->
+			env.data.apps.getByOwner 'admin', (err, apps) ->
 				res.json apps
 
 		callback()
