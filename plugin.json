@@ -1,6 +1,5 @@
 {
 	"name": "admin-auth",
-	"description": "The admin auth plugin for oauthd.",
-	"main": "index.js",
+	"description": "Allows you to authenticate on oauthd with a single admin account.",
 	"type": "auth"
 }
