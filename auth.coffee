@@ -79,36 +79,38 @@ module.exports = (env) ->
 	# Middleware setup
 	env.middlewares.auth = {} # inits the authentication middleware
 	env.middlewares.auth.needed = (req, res, next) ->
-		cb = ->
-			req.user = req.clientId
-			req.user.id = 'admin'
-			req.body ?= {}
-			next()
-		return cb() if env.data.redis.last_error
-		return cb() if req.clientId
-		# token = req.headers.cookie?.match /accessToken=%22(.*?)%22/
-		token = req.headers.Authorization?.replace /^Bearer /, ''
-		return next new restify.ResourceNotFoundError req.url + ' does not exist' if not token
-		env.data.redis.hget 'session:' + token, 'date', (err, res) ->
-			return next new restify.ResourceNotFoundError req.url + ' does not exist' if not res
-			req.clientId = 'admin'
-			cb()
+		restify.authorizationParser() req, res, () ->
+			cb = ->
+				req.user = req.clientId
+				req.user.id = 'admin'
+				req.body ?= {}
+				next()
+			return cb() if env.data.redis.last_error
+			return cb() if req.clientId
+			# token = req.headers.cookie?.match /accessToken=%22(.*?)%22/
+			token = req.headers.authorization?.replace /^Bearer /, ''
+			return next new restify.ResourceNotFoundError req.url + ' does not exist' if not token
+			env.data.redis.hget 'session:' + token, 'date', (err, res) ->
+				return next new restify.ResourceNotFoundError req.url + ' does not exist' if not res
+				req.clientId = 'admin'
+				cb()
 
 	env.middlewares.auth.optional = (req, res, next) ->
-		cb = ->
-			req.user = req.clientId
-			req.user.id = 'admin'
-			req.body ?= {}
-			next()
-		return cb() if env.data.redis.last_error
-		return cb() if req.clientId
-		token = req.headers.cookie?.match /accessToken=%22(.*?)%22/
-		token = token?[1]
-		return cb() if not token
-		env.data.redis.hget 'session:' + token, 'date', (err, res) ->
-			return cb() if not res
-			req.clientId = 'admin'
-			cb()
+		restify.authorizationParser() req, res, () ->
+			cb = ->
+				req.user = req.clientId
+				req.user.id = 'admin'
+				req.body ?= {}
+				next()
+			return cb() if env.data.redis.last_error
+			return cb() if req.clientId
+			token = req.headers.cookie?.match /accessToken=%22(.*?)%22/
+			token = token?[1]
+			return cb() if not token
+			env.data.redis.hget 'session:' + token, 'date', (err, res) ->
+				return cb() if not res
+				req.clientId = 'admin'
+				cb()
 
 
 	auth.init = ->
