@@ -141,6 +141,11 @@ module.exports = (env) ->
 		env.server.get env.config.base + '/api/apps', env.middlewares.auth.needed, (req, res, next) ->
 			env.data.apps.getByOwner 'admin', (err, apps) ->
 				res.json apps
+				next()
+
+		env.events.on 'app.create', (user, app) ->
+			if user?.id
+				env.data.redis.sadd 'u:' + user.id + ':apps', app.id
 
 		callback()
 		
