@@ -48,7 +48,7 @@ module.exports = (env) ->
 				callback null, replies[1]
 
 	hooks =
-		grantClientToken: (clientId, clientSecret, cb) ->
+		grantClientToken: (credentials, req, cb) ->
 			if env.data.redis.last_error
 				return cb new env.utilities.check.Error env.data.redis.last_error
 			next = ->
@@ -59,22 +59,24 @@ module.exports = (env) ->
 				]).exec (err, r) ->
 					return cb err if err
 					return cb null, token
-			db_login name:clientId, pass:clientSecret, (err, res) ->
+			db_login name:credentials.clientId, pass:credentials.clientSecret, (err, res) ->
 				if err
 					return cb null, false if err.message == "Invalid email or password"
 					return cb err if err
 				return next() if res
-				db_register name:clientId, pass:clientSecret, (err, res) ->
+				db_register name:credentials.clientId, pass:credentials.clientSecret, (err, res) ->
 					return cb err if err
 					next()
 
 
-		authenticateToken: (token, cb) ->
+		authenticateToken: (token, req, cb) ->
 			return cb null, false if env.data.redis.last_error
 			env.data.redis.hgetall 'session:' + token, (err, res) ->
 				return cb err if err
 				return cb null, false if not res
-				return cb null, res
+				req.clientId = res
+				req.token = token
+				return cb null, true
 
 	# Middleware setup
 	env.middlewares.auth = {} # inits the authentication middleware
@@ -119,11 +121,12 @@ module.exports = (env) ->
 	auth.setup = (callback) ->
 		env.server.post env.config.base + '/signin', (req, res, next) =>
 			res.setHeader 'Content-Type', 'text/html'
-			hooks.grantClientToken req.body.name, req.body.pass, (e, token) =>
+			hooks.grantClientToken {clientId:req.body.name, clientSecret:req.body.pass}, req, (e, token) =>
 				if not e and not token
 					e = new env.utilities.check.Error 'Invalid email or password'
 				if token
 					expireDate = new Date((new Date - 0) + _config.expire * 1000)
+					res.setHeader 'Content-Type', ''
 					res.json {
 						accessToken: token,
 						expires: expireDate.getTime()
