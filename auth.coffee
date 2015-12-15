@@ -96,6 +96,9 @@ module.exports = (env) ->
 			req.clientId = 'admin'
 			cb()
 
+	# Placeholder function for multi-users plugin
+	env.middlewares.auth.needAccess = (right) -> env.middlewares.auth.needed
+
 	env.middlewares.auth.optional = (req, res, next) ->
 		cb = ->
 			req.user = req.clientId

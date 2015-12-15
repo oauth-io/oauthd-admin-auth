@@ -1,6 +1,6 @@
 {
-  "name": "me",
-  "version": "1.0.1",
+  "name": "oauthd-admin-auth",
+  "version": "1.0.2",
   "description": "",
   "main": "Gruntfile.js",
   "scripts": {
