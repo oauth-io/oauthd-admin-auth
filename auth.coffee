@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-crypto = require 'crypto'
 restify = require 'restify'
 restifyOAuth2 = require 'restify-oauth2-oauthd'
 
@@ -143,7 +142,7 @@ module.exports = (env) ->
 							e = new env.utilities.check.Error "Invalid password format (must be 6 characters min)"
 					res.send 400, e.message
 				next()
-			
+
 		env.server.get env.config.base + '/api/apps', env.middlewares.auth.needed, (req, res, next) ->
 			env.data.apps.getByOwner 'admin', (err, apps) ->
 				res.json apps
@@ -153,7 +152,11 @@ module.exports = (env) ->
 			if user?.id
 				env.data.redis.sadd 'u:' + user.id + ':apps', app.id
 
+		env.events.on 'app.remove', (user, app) ->
+			if user?.id
+				env.data.redis.srem 'u:' + user.id + ':apps', app.id
+
 		callback()
-		
+
 	auth
 

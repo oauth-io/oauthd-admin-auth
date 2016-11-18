@@ -1,6 +1,6 @@
 {
   "name": "oauthd-admin-auth",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "Gruntfile.js",
   "scripts": {
@@ -9,14 +9,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "grunt-contrib-coffee": "^0.13.0",
-    "grunt-contrib-watch": "^0.6.1"
+    "grunt-contrib-coffee": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0"
   },
   "dependencies": {
-    "async": "^1.4.2",
-    "crypto": "0.0.3",
-    "restify": "^3.0.3",
-    "restify-oauth2-oauthd": "^4.0.3-oauthd",
-    "sugar": "^1.4.1"
+    "restify": "^4.3.0",
+    "restify-oauth2-oauthd": "^4.0.4-oauthd"
   }
 }
